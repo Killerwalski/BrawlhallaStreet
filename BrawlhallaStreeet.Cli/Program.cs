@@ -34,6 +34,9 @@ namespace BrawlhallaStreeet.Cli
             Program prog = new Program();
             await prog.Setup();
 
+            var streetBot = new StreetBot();
+            await streetBot.MainAsync();
+
         }
 
         public async Task Setup()

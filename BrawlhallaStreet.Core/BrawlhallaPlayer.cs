@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 
 namespace BrawlhallaStreet.Core
 {
+    [BsonIgnoreExtraElements]
     public class BrawlhallaPlayer
     {
         [JsonProperty("brawlhalla_id")]
