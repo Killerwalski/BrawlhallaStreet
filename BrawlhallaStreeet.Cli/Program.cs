@@ -32,52 +32,9 @@ namespace BrawlhallaStreeet.Cli
 
             
             Program prog = new Program();
-            await prog.Setup();
 
             var streetBot = new StreetBot(prog.Configuration);
             await streetBot.MainAsync();
-
-        }
-
-        public async Task Setup()
-        {
-            Configuration = new ConfigurationBuilder()
-                // .AddJsonFile("appsettings.json", true, true)
-                .AddJsonFile("appsettings.Development.json", true, true)
-                .Build();
-
-            var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
-            var databaseName = Configuration["BrawlhallaDatabaseSettings:DatabaseName"];
-            var collectionName = Configuration["BrawlhallaDatabaseSettings:CollectionName"];
-
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName);
-            MongoCollection = database.GetCollection<BrawlhallaPlayer>(collectionName);
-
-            var count = await MongoCollection.CountDocumentsAsync(new BsonDocument());
-            if (count == 0)
-                await SeedDatabase();
-
-        }
-
-        public async Task<BrawlhallaPlayer> GetBrawlhallaPlayer(int playerId, IConfiguration config)
-        {
-            var url = $"https://api.brawlhalla.com/player/{playerId}/stats?api_key=" + config["BrawlhallaApiKey"];
-            HttpClient client = new HttpClient();
-            string responseBody = await client.GetStringAsync(url);
-            var player = JsonConvert.DeserializeObject<BrawlhallaPlayer>(responseBody);
-            return player;
-        }
-
-        private async Task SeedDatabase()
-        {
-            var document = JsonConvert.DeserializeObject<BrawlhallaPlayer>(File.ReadAllText(@"Killerwalski_Seed.json"));
-            await MongoCollection.InsertOneAsync(document);
-        }
-
-        public async Task InsertPlayer(BrawlhallaPlayer player)
-        {
-            await MongoCollection.InsertOneAsync(player);
         }
     }
 }

@@ -1,5 +1,6 @@
 using BrawlhallaStreeet.Cli;
 using BrawlhallaStreet.Core;
+using BrawlhallaStreet.Core.Services;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -7,6 +8,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -18,6 +20,7 @@ namespace BrawlhallaStreet.Tests
     {
         public ILogger Logger;
         public IConfiguration Configuration;
+        public IDataService DataService;
 
         public IMongoCollection<BrawlhallaPlayer> MongoCollection { get; }
 
@@ -31,29 +34,27 @@ namespace BrawlhallaStreet.Tests
 
             Configuration = new ConfigurationBuilder()
                 // .AddJsonFile("appsettings.json", true, true)
-                .AddJsonFile(@"C:\Code\Repositories\BrawlhallaStreet\BrawlhallaStreeet.Cli\appsettings.Development.json", true, true)
+                .AddJsonFile(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName +  @"\BrawlhallaStreeet.Cli\appsettings.Development.json", false, true)
                 .Build();
 
-            var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
-            var databaseName = Configuration["BrawlhallaDatabaseSettings:DatabaseName"];
-            var collectionName = Configuration["BrawlhallaDatabaseSettings:CollectionName"];
+            DataService = new BrawlhallaDataService(Configuration);
 
-            var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName);
-            MongoCollection = database.GetCollection<BrawlhallaPlayer>(collectionName);
+            //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
+            //var databaseName = Configuration["BrawlhallaDatabaseSettings:DatabaseName"];
+            //var collectionName = Configuration["BrawlhallaDatabaseSettings:CollectionName"];
+
+            //var client = new MongoClient(connectionString);
+            //var database = client.GetDatabase(databaseName);
+            //MongoCollection = database.GetCollection<BrawlhallaPlayer>(collectionName);
         }
 
         [Fact]
-        public async Task Insert_Updated_Player_ToMongoAsync()
+        public async Task DataService_Gets_Updated_Player()
         {
-            Program prog = new Program();
-            await prog.Setup();
-
-            var result = await prog.GetBrawlhallaPlayer(3879460, Configuration);
+            var result = await DataService.GetBrawlhallaPlayer(3879460);
             Logger.Information("Result: " + result);
 
             Assert.NotNull(result);
-            await prog.InsertPlayer(result);
         }
 
         [Fact]
