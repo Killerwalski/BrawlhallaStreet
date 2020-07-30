@@ -1,7 +1,12 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MongoDB.Driver;
 using Newtonsoft.Json;
+using Serilog;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -11,10 +16,12 @@ namespace BrawlhallaStreet.Core.Services
     {
         private IConfiguration Configuration;
         private IMongoCollection<BrawlhallaPlayer> MongoCollection;
+        public ILogger Logger;
 
-        public BrawlhallaDataService(IConfiguration configuration)
+        public BrawlhallaDataService(IConfiguration configuration, ILogger logger)
         {
             Configuration = configuration;
+            Logger = logger;
 
             var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
             var databaseName = Configuration["BrawlhallaDatabaseSettings:DatabaseName"];
@@ -43,6 +50,25 @@ namespace BrawlhallaStreet.Core.Services
         {
             var document = JsonConvert.DeserializeObject<BrawlhallaPlayer>(File.ReadAllText(@"Killerwalski_Seed.json"));
             await MongoCollection.InsertOneAsync(document);
+        }
+
+        public async Task<List<BrawlhallaPlayer>> GetLatestEntriesForPlayer(int playerId)
+        {
+            var playerEntries = new List<BrawlhallaPlayer>();
+            var filter = Builders<BrawlhallaPlayer>.Filter.Eq(p => p.BrawlhallaId, playerId);
+            using (var cursor = await MongoCollection.Find(filter).ToCursorAsync())
+            {
+                while (await cursor.MoveNextAsync())
+                {
+                    foreach (var doc in cursor.Current)
+                    {
+                        playerEntries.Add(doc);
+                    }
+                }
+            }
+            Logger.Information("Collection contains " + playerEntries.Count + " Players.");
+            playerEntries = playerEntries.OrderByDescending(p => p.Games).Take(2).ToList();
+            return playerEntries;
         }
     }
 }

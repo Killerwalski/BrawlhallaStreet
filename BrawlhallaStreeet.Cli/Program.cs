@@ -13,7 +13,6 @@ namespace BrawlhallaStreeet.Cli
     {
         private IConfiguration Configuration;
         private IDataService DataService;
-        private IMongoCollection<BrawlhallaPlayer> MongoCollection;
 
         private static async Task Main(string[] args)
         {
@@ -38,12 +37,12 @@ namespace BrawlhallaStreeet.Cli
                 .AddJsonFile("appsettings.json", false, true)
                 .AddJsonFile("appsettings.Development.json", true, true)
                 .Build();
-            DataService = new BrawlhallaDataService(Configuration);
+            DataService = new BrawlhallaDataService(Configuration, Log.Logger);
         }
 
         private async Task RunStreetBot()
         {
-            var streetBot = new StreetBot(Configuration, DataService);
+            var streetBot = new StreetBot(Configuration, Log.Logger, DataService);
             await streetBot.MainAsync();
         }
     }
