@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using BrawlhallaStreet.Core.Services;
+using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
 using Serilog;
@@ -14,11 +15,13 @@ namespace BrawlhallaStreet.Core
     {
         private DiscordSocketClient Client;
 		private readonly IConfiguration Configuration;
+		private IDataService DataService;
 		public ILogger Logger;
 
-		public StreetBot(IConfiguration configuration)
+		public StreetBot(IConfiguration configuration, IDataService dataService)
 		{
 			Configuration = configuration;
+			DataService = dataService;
 		}
 		public async Task MainAsync()
 		{

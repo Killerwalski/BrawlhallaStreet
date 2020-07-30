@@ -38,14 +38,6 @@ namespace BrawlhallaStreet.Tests
                 .Build();
 
             DataService = new BrawlhallaDataService(Configuration);
-
-            //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
-            //var databaseName = Configuration["BrawlhallaDatabaseSettings:DatabaseName"];
-            //var collectionName = Configuration["BrawlhallaDatabaseSettings:CollectionName"];
-
-            //var client = new MongoClient(connectionString);
-            //var database = client.GetDatabase(databaseName);
-            //MongoCollection = database.GetCollection<BrawlhallaPlayer>(collectionName);
         }
 
         [Fact]

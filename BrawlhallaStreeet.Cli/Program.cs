@@ -1,14 +1,10 @@
 ﻿using BrawlhallaStreet.Core;
+using BrawlhallaStreet.Core.Services;
 using Microsoft.Extensions.Configuration;
-using MongoDB.Bson;
 using MongoDB.Driver;
-using Newtonsoft.Json;
 using Serilog;
 using Serilog.Events;
 using System;
-using System.IO;
-using System.Net.Http;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace BrawlhallaStreeet.Cli
@@ -16,7 +12,9 @@ namespace BrawlhallaStreeet.Cli
     public class Program
     {
         private IConfiguration Configuration;
+        private IDataService DataService;
         private IMongoCollection<BrawlhallaPlayer> MongoCollection;
+
         private static async Task Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
@@ -30,10 +28,22 @@ namespace BrawlhallaStreeet.Cli
             Console.WriteLine("Hello World!");
             Log.Information("Application Starting");
 
-            
             Program prog = new Program();
+            await prog.RunStreetBot();
+        }
 
-            var streetBot = new StreetBot(prog.Configuration);
+        public Program()
+        {
+            Configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", false, true)
+                .AddJsonFile("appsettings.Development.json", true, true)
+                .Build();
+            DataService = new BrawlhallaDataService(Configuration);
+        }
+
+        private async Task RunStreetBot()
+        {
+            var streetBot = new StreetBot(Configuration, DataService);
             await streetBot.MainAsync();
         }
     }
