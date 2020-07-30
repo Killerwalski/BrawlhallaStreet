@@ -8,6 +8,7 @@ using Serilog.Events;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace BrawlhallaStreeet.Cli
@@ -30,11 +31,10 @@ namespace BrawlhallaStreeet.Cli
             Log.Information("Application Starting");
 
             
-
             Program prog = new Program();
             await prog.Setup();
 
-            var streetBot = new StreetBot();
+            var streetBot = new StreetBot(prog.Configuration);
             await streetBot.MainAsync();
 
         }

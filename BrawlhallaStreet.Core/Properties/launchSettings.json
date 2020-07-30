@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "BrawlhallaStreet.Core": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DiscordToken": "NzM3MTU4OTY5MTg1MDA5NzQ2.Xx5Syg.vn617f-LfhlHAIHAFzbf40Kr1yk"
+      }
+    }
+  }
+}
