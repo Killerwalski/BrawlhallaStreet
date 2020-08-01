@@ -8,7 +8,7 @@ namespace BrawlhallaStreet.Core.Services
 {
     class FakeDataService : IDataService
     {
-        public Task<BrawlhallaPlayer> GetBrawlhallaPlayer(int playerId)
+        public Task<BrawlhallaPlayer> GetBrawlhallaPlayerFromApi(int playerId)
         {
             throw new NotImplementedException();
         }

@@ -32,7 +32,7 @@ namespace BrawlhallaStreet.Core.Services
             MongoCollection = database.GetCollection<BrawlhallaPlayer>(collectionName);
         }
 
-        public async Task<BrawlhallaPlayer> GetBrawlhallaPlayer(int playerId)
+        public async Task<BrawlhallaPlayer> GetBrawlhallaPlayerFromApi(int playerId)
         {
             var url = $"https://api.brawlhalla.com/player/{playerId}/stats?api_key=" + Configuration["BrawlhallaApiKey"];
             HttpClient client = new HttpClient();

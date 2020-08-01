@@ -43,7 +43,7 @@ namespace BrawlhallaStreet.Tests
         [Fact]
         public async Task DataService_Gets_Updated_Player()
         {
-            var result = await DataService.GetBrawlhallaPlayer(3879460);
+            var result = await DataService.GetBrawlhallaPlayerFromApi(3879460);
             Logger.Information("Result: " + result);
 
             Assert.NotNull(result);
