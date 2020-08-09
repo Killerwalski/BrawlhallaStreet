@@ -4,6 +4,7 @@ using BrawlhallaStreet.Core.Services;
 using Microsoft.Extensions.Configuration;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -45,6 +46,8 @@ namespace BrawlhallaStreet.Tests
         {
             var result = await DataService.GetBrawlhallaPlayerFromApi(3879460);
             Logger.Information("Result: " + result);
+            var serialized = JsonConvert.SerializeObject(result, Formatting.Indented);
+            System.IO.File.WriteAllText(Directory.GetCurrentDirectory() + @$"\Samples\playerSample.json", serialized);
 
             Assert.NotNull(result);
         }

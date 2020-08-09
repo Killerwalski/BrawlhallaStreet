@@ -339,3 +339,4 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /BrawlhallaStreeet.Cli/appsettings.Development.json
+/BrawlhallaStreet.Core/appsettings.Development.json

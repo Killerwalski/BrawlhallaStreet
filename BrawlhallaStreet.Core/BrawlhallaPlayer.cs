@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 
 namespace BrawlhallaStreet.Core
@@ -7,6 +8,8 @@ namespace BrawlhallaStreet.Core
     [BsonIgnoreExtraElements]
     public class BrawlhallaPlayer
     {
+        public DateTime CreatedDate { get; set; }
+
         [JsonProperty("brawlhalla_id")]
         public int BrawlhallaId { get; set; }
 

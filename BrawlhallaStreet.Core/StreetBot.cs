@@ -18,7 +18,7 @@ namespace BrawlhallaStreet.Core
     {
         private DiscordSocketClient Client;
 		private readonly IConfiguration Configuration;
-		private IDataService DataService;
+		private readonly IDataService DataService;
 		public ILogger Logger;
 
 		public StreetBot(IConfiguration configuration, ILogger logger, IDataService dataService)
@@ -42,6 +42,7 @@ namespace BrawlhallaStreet.Core
             // This will add an event.
             // Client.MessageUpdated += MessageUpdated;
 
+            Client.MessageReceived += GetOwnerDmChannelAsync;
 
             Client.Ready += () =>
             {
@@ -49,6 +50,7 @@ namespace BrawlhallaStreet.Core
 
                 CurrentChannel = GetBrawlhallaMessageChannel();
 
+                // await GetOwnerDmChannelAsync();
                 // await TestMethod();
 
                 return Task.CompletedTask;
@@ -59,6 +61,17 @@ namespace BrawlhallaStreet.Core
             await Client.StopAsync();
 			Client.Dispose();
 		}
+
+        private async Task<IMessageChannel> GetOwnerDmChannelAsync(SocketMessage socketMessage)
+        {
+            //var textChannelId = Client.Guilds.FirstOrDefault().Channels.ToList()
+            //   .Where(x => x.Name.ToLower() == "brawlhalla_street").FirstOrDefault().Id;
+            var dMChannels = await Client.GetDMChannelsAsync();
+
+            var ownerDm = dMChannels.FirstOrDefault() as IMessageChannel;
+            await ownerDm.SendMessageAsync("Hello World");
+            return ownerDm;
+        }
 
         private IMessageChannel GetBrawlhallaMessageChannel()
         {
@@ -85,7 +98,6 @@ namespace BrawlhallaStreet.Core
                             {
                                 Logger.Information(item.ToString());
                                 var currentChannel = GetBrawlhallaMessageChannel();
-                                await currentChannel.SendMessageAsync(item.ToString());
                             }
                         }
                     }
@@ -158,10 +170,12 @@ namespace BrawlhallaStreet.Core
             var updatedLegend = oldLegendData.Where(x => newLegendData.Any(o => o.LegendNameKey == x.LegendNameKey && o.Games != x.Games)).ToList();
             foreach (var item in updatedLegend)
             {
-                Logger.Information("Player played " + (newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Games - item.Games) + " game(s) With " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.LegendNameKey));
+                var gamesPlayed = newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Games - item.Games;
+                Logger.Information("Player played " + gamesPlayed + " game(s) With " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.LegendNameKey));
 
                 // Could probably just make this a class
                 var statsSummary = new StatsSummary();
+                statsSummary.GamesPlayed = gamesPlayed;
                 statsSummary.PlayerName = playerEntries[0].Name;
                 statsSummary.WeaponOneDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageweaponone) - Convert.ToInt32(item.Damageweaponone);
                 statsSummary.WeaponTwoDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageweapontwo) - Convert.ToInt32(item.Damageweapontwo);

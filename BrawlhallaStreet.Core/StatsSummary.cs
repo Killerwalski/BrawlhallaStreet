@@ -25,10 +25,11 @@ namespace BrawlhallaStreet.Core
         public int Falls { get; set; }
         public int Suicides { get; set; }
         public int TeamKills { get; set; }
+        public int GamesPlayed { get; set; }
 
         public override string ToString()
         {
-            return $"Player *** {PlayerName} *** Damage Summary\n WeaponOne: {WeaponOneDamage}  \t WeaponTwo: {WeaponTwoDamage} \t Unarmed: {UnarmedDamage} \n" +
+            return $"Player *** {PlayerName} *** Damage Summary for {GamesPlayed} game{ (GamesPlayed == 1 ? "" : "s") } \n WeaponOne: {WeaponOneDamage}  \t WeaponTwo: {WeaponTwoDamage} \t Unarmed: {UnarmedDamage} \n" +
                 $"Gadgets: {GadgetDamage} \t Thrown Item: {ThrownItemDamage} \t Total Damage: {TotalDamage} \t Damage Taken: {DamageTaken}\n" + 
                 $"KO Summary\n WeaponOne: {WeaponOneKo} \t WeaponTwo: {WeaponTwoKo} \t Unarmed: {UnarmedKo} \n" + 
                 $"Gadgets: {GadgetKo} \t Thrown Item: {ThrownItemKo} \t Total KO: {TotalKo} \t Falls: {Falls} \n" + 

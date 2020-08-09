@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlhallaStreet.Core", "BrawlhallaStreet.Core\BrawlhallaStreet.Core.csproj", "{38C4FA68-21C6-4897-975E-41986DB68EF5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrawlhallaStreet.Core", "BrawlhallaStreet.Core\BrawlhallaStreet.Core.csproj", "{38C4FA68-21C6-4897-975E-41986DB68EF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlhallaStreeet.Cli", "BrawlhallaStreeet.Cli\BrawlhallaStreeet.Cli.csproj", "{BE333D9E-0D0D-4FFF-AB8C-6D611361FB7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrawlhallaStreeet.Cli", "BrawlhallaStreeet.Cli\BrawlhallaStreeet.Cli.csproj", "{BE333D9E-0D0D-4FFF-AB8C-6D611361FB7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlhallaStreet.Tests", "BrawlhallaStreet.Tests\BrawlhallaStreet.Tests.csproj", "{C9D12796-2838-4A13-B99F-44F5E91063BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrawlhallaStreet.Tests", "BrawlhallaStreet.Tests\BrawlhallaStreet.Tests.csproj", "{C9D12796-2838-4A13-B99F-44F5E91063BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrawlhallaStreet.Web", "BrawlhallaStreet.Web\BrawlhallaStreet.Web.csproj", "{2C85CFFA-9F0D-462D-A9A4-9E1A50C56567}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,6 +29,10 @@ Global
 		{C9D12796-2838-4A13-B99F-44F5E91063BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C9D12796-2838-4A13-B99F-44F5E91063BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C9D12796-2838-4A13-B99F-44F5E91063BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C85CFFA-9F0D-462D-A9A4-9E1A50C56567}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C85CFFA-9F0D-462D-A9A4-9E1A50C56567}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C85CFFA-9F0D-462D-A9A4-9E1A50C56567}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C85CFFA-9F0D-462D-A9A4-9E1A50C56567}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

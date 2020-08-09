@@ -43,6 +43,11 @@ namespace BrawlhallaStreet.Core.Services
 
         public async Task InsertPlayer(BrawlhallaPlayer player)
         {
+            if (player.CreatedDate == null)
+            {
+                player.CreatedDate = DateTime.Now;
+            }
+
             await MongoCollection.InsertOneAsync(player);
         }
 

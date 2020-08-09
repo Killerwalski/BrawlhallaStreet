@@ -1,6 +1,7 @@
 ﻿using BrawlhallaStreet.Core;
 using BrawlhallaStreet.Core.Services;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -12,15 +13,14 @@ using Xunit.Abstractions;
 
 namespace BrawlhallaStreet.Tests
 {
-    public class BotTests
+    public class DataServiceTests
     {
         public ILogger Logger;
         public IConfiguration Configuration;
         public IDataService DataService;
 
-        public StreetBot StreetBot { get; set; }
 
-        public BotTests(ITestOutputHelper output)
+        public DataServiceTests(ITestOutputHelper output)
         {
             Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose()
@@ -29,34 +29,20 @@ namespace BrawlhallaStreet.Tests
                 .ForContext<ApiTests>();
 
             Configuration = new ConfigurationBuilder()
+                // .AddJsonFile("appsettings.json", true, true)
                 .AddJsonFile(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\BrawlhallaStreeet.Cli\appsettings.Development.json", false, true)
                 .Build();
 
-            DataService = new BrawlhallaDataService(Configuration, Logger);
-            StreetBot = new StreetBot(Configuration, Logger, DataService);
-
-            //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
+            DataService = new FakeDataService(Configuration, Logger);
         }
 
         [Fact]
-        public async Task Calculate_Difference_Between_Last_Two_PlayersAsync()
+        public async Task DataService_Gets_Player()
         {
-            await StreetBot.CalculateStatsForPlayerGameSpan(3879460);
+            var player = await DataService.GetBrawlhallaPlayerFromApi(1);
+            var playerJson = JsonConvert.SerializeObject(player, Formatting.Indented);
+            Logger.Information("Returned Player:\n " +  playerJson);
 
-        }
-
-        [Fact]
-        public async Task StreetBot_Saves_Updated_Player_Data()
-        {
-            await StreetBot.TestMethod();
-
-        }
-
-        [Fact]
-        public void StreetBot_Gets_Configuration()
-        {
-            StreetBot streetBot = new StreetBot(Configuration, Logger, DataService);
-            Assert.True(true);
         }
     }
 }
