@@ -15,8 +15,8 @@ namespace BrawlhallaStreet.Core.Services
 {
     public class FakeDataService : IDataService
     {
-        public object Configuration { get; }
-        public object Logger { get; }
+        public IConfiguration Configuration { get; }
+        public ILogger Logger { get; }
         public FakeDataService(IConfiguration configuration, ILogger logger)
         {
             Configuration = configuration;
@@ -39,14 +39,22 @@ namespace BrawlhallaStreet.Core.Services
             return Task.FromResult(fakePlayer);
         }
 
-        public Task<List<BrawlhallaPlayer>> GetLatestEntriesForPlayer(int playerId)
+        public async Task<List<BrawlhallaPlayer>> GetLatestEntriesForPlayer(int playerId)
         {
-            throw new NotImplementedException();
+            List<BrawlhallaPlayer> fakePlayerEntries;
+            var fileName = Directory.GetFiles(Directory.GetCurrentDirectory() + @"\Samples\").Where(x => x.Contains("latestEntries")).FirstOrDefault();
+            using (StreamReader r = new StreamReader(fileName))
+            {
+                string json = r.ReadToEnd();
+                fakePlayerEntries = JsonConvert.DeserializeObject<List<BrawlhallaPlayer>>(json);
+            }
+
+            return await Task.FromResult(fakePlayerEntries);
         }
 
         public Task InsertPlayer(BrawlhallaPlayer player)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }
