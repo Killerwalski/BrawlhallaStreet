@@ -14,11 +14,11 @@ namespace BrawlhallaStreet.Core.Services
 {
     public class BrawlhallaDataService : IDataService
     {
-        private IConfiguration Configuration;
+        private IConfigurationRoot Configuration;
         private IMongoCollection<BrawlhallaPlayer> MongoCollection;
         public ILogger Logger;
 
-        public BrawlhallaDataService(IConfiguration configuration, ILogger logger)
+        public BrawlhallaDataService(IConfigurationRoot configuration, ILogger logger)
         {
             Configuration = configuration;
             Logger = logger;

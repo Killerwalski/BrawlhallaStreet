@@ -1,6 +1,8 @@
 ﻿using BrawlhallaStreet.Core;
+using BrawlhallaStreet.Core.Modules;
 using BrawlhallaStreet.Core.Services;
 using Microsoft.Extensions.Configuration;
+using MongoDB.Driver;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -15,7 +17,7 @@ namespace BrawlhallaStreet.Tests
     public class BotTests
     {
         public ILogger Logger;
-        public IConfiguration Configuration;
+        public IConfigurationRoot Configuration;
         public IDataService DataService;
 
         public StreetBot StreetBot { get; set; }
@@ -36,6 +38,14 @@ namespace BrawlhallaStreet.Tests
             StreetBot = new StreetBot(Configuration, Logger, DataService);
 
             //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
+        }
+
+        [Fact]
+        public async Task Command_Module_Outputs_Last_Recap()
+        {
+            var service = new Discord.Commands.CommandService();
+            var commandModule = new CommandModule(service, Configuration);
+            await commandModule.Recap();
         }
 
         [Fact]

@@ -12,7 +12,7 @@ namespace BrawlhallaStreeet.Cli
 {
     public class Program
     {
-        private IConfiguration Configuration;
+        private IConfigurationRoot Configuration;
         private IDataService DataService;
 
         private static async Task Main(string[] args)

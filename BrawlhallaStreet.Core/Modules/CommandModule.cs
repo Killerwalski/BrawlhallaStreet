@@ -1,4 +1,5 @@
-﻿using Discord;
+﻿using BrawlhallaStreet.Core.Services;
+using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
@@ -8,9 +9,10 @@ namespace BrawlhallaStreet.Core.Modules
     public class CommandModule : ModuleBase<SocketCommandContext>
     {
         private readonly CommandService CommandService;
-        private readonly IConfigurationRoot Configuration;
+        private readonly IConfiguration Configuration;
+        private readonly IDataService DataService;
 
-        public CommandModule(CommandService service, IConfigurationRoot config)
+        public CommandModule(CommandService service, IConfiguration config)
         {
             CommandService = service;
             Configuration = config;
@@ -18,10 +20,17 @@ namespace BrawlhallaStreet.Core.Modules
 
         [Command("recap"), Alias("r")]
         [Summary("Make the bot recap the last game")]
-        [RequireUserPermission(GuildPermission.Administrator)]
-        public Task Recap([Remainder] string text)
+        // [RequireUserPermission(GuildPermission.Administrator)]
+        public Task Recap()
         {
-            return ReplyAsync(text);
+            var output = "Hello";
+            return ReplyAsync(output);
         }
+
+        //public Task Recap([Remainder] string text)
+        //{
+
+        //    return ReplyAsync(text);
+        //}
     }
 }

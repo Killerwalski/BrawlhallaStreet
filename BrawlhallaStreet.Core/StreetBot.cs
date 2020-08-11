@@ -14,19 +14,21 @@ using System.Threading.Tasks;
 
 namespace BrawlhallaStreet.Core
 {
+    // This should act more as a utility class rather than something to interface with discord
     public class StreetBot 
     {
         private DiscordSocketClient Client;
-		private readonly IConfiguration Configuration;
+		private readonly IConfigurationRoot Configuration;
 		private readonly IDataService DataService;
 		public ILogger Logger;
 
-		public StreetBot(IConfiguration configuration, ILogger logger, IDataService dataService)
+		public StreetBot(IConfigurationRoot configuration, ILogger logger, IDataService dataService)
 		{
 			Configuration = configuration;
             Logger = logger;
 			DataService = dataService;
 		}
+
 		public async Task MainAsync()
 		{
 			await SetupLogger();
@@ -163,7 +165,6 @@ namespace BrawlhallaStreet.Core
             var playerEntries = await DataService.GetLatestEntriesForPlayer(playerId);
             
             // Compare Difference
-            var difference = string.Empty;
             var gameDiff = playerEntries[0].Games - playerEntries[1].Games;
             var oldLegendData = playerEntries[1].Legends.ToList();
             var newLegendData = playerEntries[0].Legends.ToList();
@@ -173,7 +174,6 @@ namespace BrawlhallaStreet.Core
                 var gamesPlayed = newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Games - item.Games;
                 Logger.Information("Player played " + gamesPlayed + " game(s) With " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.LegendNameKey));
 
-                // Could probably just make this a class
                 var statsSummary = new StatsSummary();
                 statsSummary.GamesPlayed = gamesPlayed;
                 statsSummary.PlayerName = playerEntries[0].Name;

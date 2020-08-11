@@ -20,7 +20,7 @@ namespace BrawlhallaStreet.Tests
     public class ApiTests
     {
         public ILogger Logger;
-        public IConfiguration Configuration;
+        public IConfigurationRoot Configuration;
         public IDataService DataService;
 
         public IMongoCollection<BrawlhallaPlayer> MongoCollection { get; }
