@@ -37,7 +37,7 @@ namespace BrawlhallaStreeet.Cli
         private async Task RunStreetBot()
         {
             var streetBot = new StreetBot(Configuration, Log.Logger, DataService);
-            
+            await Task.CompletedTask;
         }
     }
 }

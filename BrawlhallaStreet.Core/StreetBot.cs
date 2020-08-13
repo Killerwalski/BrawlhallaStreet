@@ -14,7 +14,6 @@ namespace BrawlhallaStreet.Core
     // This should act more as a utility class rather than something to interface with discord
     public class StreetBot
     {
-        private DiscordSocketClient Client;
         private readonly IConfigurationRoot Configuration;
         private readonly IDataService DataService;
         public ILogger Logger;
@@ -24,26 +23,6 @@ namespace BrawlhallaStreet.Core
             Configuration = configuration;
             Logger = logger;
             DataService = dataService;
-        }
-
-        private async Task<IMessageChannel> GetOwnerDmChannelAsync(SocketMessage socketMessage)
-        {
-            //var textChannelId = Client.Guilds.FirstOrDefault().Channels.ToList()
-            //   .Where(x => x.Name.ToLower() == "brawlhalla_street").FirstOrDefault().Id;
-            var dMChannels = await Client.GetDMChannelsAsync();
-
-            var ownerDm = dMChannels.FirstOrDefault() as IMessageChannel;
-            await ownerDm.SendMessageAsync("Hello World");
-            return ownerDm;
-        }
-
-        private IMessageChannel GetBrawlhallaMessageChannel()
-        {
-            var textChannelId = Client.Guilds.FirstOrDefault().Channels.ToList()
-                .Where(x => x.Name.ToLower() == "brawlhalla_street").FirstOrDefault().Id;
-            var currentChannel = Client.GetChannel(textChannelId) as IMessageChannel;
-            // await currentChannel.SendMessageAsync("Hello World");
-            return currentChannel;
         }
 
         public async Task LogSummaries()
@@ -67,19 +46,10 @@ namespace BrawlhallaStreet.Core
             catch (Exception ex)
             {
                 Logger.Error("Exception During MainAsync: ", ex);
-                await Client.StopAsync();
-                Client.Dispose();
                 throw;
             }
         }
 
-        private async Task MessageUpdated(Cacheable<IMessage, ulong> before, SocketMessage after, ISocketMessageChannel channel)
-        {
-            // If the message was not in the cache, downloading it will result in getting a copy of `after`.
-            var message = await before.GetOrDownloadAsync();
-            Console.WriteLine($"{message} -> {after}");
-            await channel.SendMessageAsync("Hello World");
-        }
 
         public async Task<bool> RefreshedPlayer(int playerId)
         {
@@ -96,65 +66,59 @@ namespace BrawlhallaStreet.Core
             return false;
         }
 
-        private Task SetupLogger()
-        {
-            Logger = new LoggerConfiguration()
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .CreateLogger()
-                .ForContext<StreetBot>();
-
-            return Task.CompletedTask;
-        }
-
-        private Task Log(LogMessage msg)
-        {
-            Logger.Information(msg.ToString());
-            // Console.WriteLine(msg.ToString());
-            return Task.CompletedTask;
-        }
-
         public async Task<List<StatsSummary>> CalculateStatsForPlayerGameSpan(int playerId)
         {
-            List<StatsSummary> statsSummaries = new List<StatsSummary>();
-            var playerEntries = await DataService.GetLatestEntriesForPlayer(playerId);
-
-            // Compare Difference
-            var gameDiff = playerEntries[0].Games - playerEntries[1].Games;
-            var oldLegendData = playerEntries[1].Legends.ToList();
-            var newLegendData = playerEntries[0].Legends.ToList();
-            var updatedLegend = oldLegendData.Where(x => newLegendData.Any(o => o.LegendNameKey == x.LegendNameKey && o.Games != x.Games)).ToList();
-            foreach (var item in updatedLegend)
+            try
             {
-                var gamesPlayed = newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Games - item.Games;
-                Logger.Information("Player played " + gamesPlayed + " game(s) With " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.LegendNameKey));
+                List<StatsSummary> statsSummaries = new List<StatsSummary>();
+                var playerEntries = await DataService.GetLatestEntriesForPlayer(playerId);
 
-                var statsSummary = new StatsSummary();
-                statsSummary.GamesPlayed = gamesPlayed;
-                statsSummary.PlayerName = playerEntries[0].Name;
-                statsSummary.WeaponOneDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageweaponone) - Convert.ToInt32(item.Damageweaponone);
-                statsSummary.WeaponTwoDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageweapontwo) - Convert.ToInt32(item.Damageweapontwo);
-                statsSummary.UnarmedDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageunarmed) - Convert.ToInt32(item.Damageunarmed);
-                statsSummary.GadgetDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagegadgets) - Convert.ToInt32(item.Damagegadgets);
-                statsSummary.ThrownItemDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagethrownitem) - Convert.ToInt32(item.Damagethrownitem);
-                statsSummary.TotalDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagedealt) - Convert.ToInt32(item.Damagedealt);
-                statsSummary.DamageTaken = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagetaken) - Convert.ToInt32(item.Damagetaken);
+                // Compare Difference
+                var gameDiff = playerEntries[0].Games - playerEntries[1].Games;
+                var oldLegendData = playerEntries[1].Legends.ToList();
+                var newLegendData = playerEntries[0].Legends.ToList();
+                var updatedLegend = newLegendData.Where(x => oldLegendData.Any(o => o.LegendNameKey == x.LegendNameKey && o.Games != x.Games)).ToList();
 
-                statsSummary.WeaponOneKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Koweaponone) - Convert.ToInt32(item.Koweaponone);
-                statsSummary.WeaponTwoKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Koweapontwo) - Convert.ToInt32(item.Koweapontwo);
-                statsSummary.UnarmedKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kounarmed) - Convert.ToInt32(item.Kounarmed);
-                statsSummary.GadgetKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kogadgets) - Convert.ToInt32(item.Kogadgets);
-                statsSummary.ThrownItemKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kothrownitem) - Convert.ToInt32(item.Kothrownitem);
-                statsSummary.TotalKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kos) - Convert.ToInt32(item.Kos);
-                statsSummary.Falls = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Falls) - Convert.ToInt32(item.Falls);
+                // if no new games updatedLegend will be empty
 
-                statsSummary.Suicides = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Suicides) - Convert.ToInt32(item.Suicides);
-                statsSummary.TeamKills = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Teamkos) - Convert.ToInt32(item.Teamkos);
+                foreach (var item in updatedLegend)
+                {
+                    var gamesPlayed = newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Games - item.Games;
+                    Logger.Information("Player played " + gamesPlayed + " game(s) With " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(item.LegendNameKey));
 
-                Logger.Debug(statsSummary.ToString());
-                statsSummaries.Add(statsSummary);
+                    var statsSummary = new StatsSummary();
+                    statsSummary.GamesPlayed = gamesPlayed;
+                    statsSummary.PlayerName = playerEntries[0].Name;
+                    statsSummary.WeaponOneDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageweaponone) - Convert.ToInt32(item.Damageweaponone);
+                    statsSummary.WeaponTwoDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageweapontwo) - Convert.ToInt32(item.Damageweapontwo);
+                    statsSummary.UnarmedDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damageunarmed) - Convert.ToInt32(item.Damageunarmed);
+                    statsSummary.GadgetDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagegadgets) - Convert.ToInt32(item.Damagegadgets);
+                    statsSummary.ThrownItemDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagethrownitem) - Convert.ToInt32(item.Damagethrownitem);
+                    statsSummary.TotalDamage = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagedealt) - Convert.ToInt32(item.Damagedealt);
+                    statsSummary.DamageTaken = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Damagetaken) - Convert.ToInt32(item.Damagetaken);
+
+                    statsSummary.WeaponOneKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Koweaponone) - Convert.ToInt32(item.Koweaponone);
+                    statsSummary.WeaponTwoKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Koweapontwo) - Convert.ToInt32(item.Koweapontwo);
+                    statsSummary.UnarmedKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kounarmed) - Convert.ToInt32(item.Kounarmed);
+                    statsSummary.GadgetKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kogadgets) - Convert.ToInt32(item.Kogadgets);
+                    statsSummary.ThrownItemKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kothrownitem) - Convert.ToInt32(item.Kothrownitem);
+                    statsSummary.TotalKo = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Kos) - Convert.ToInt32(item.Kos);
+                    statsSummary.Falls = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Falls) - Convert.ToInt32(item.Falls);
+
+                    statsSummary.Suicides = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Suicides) - Convert.ToInt32(item.Suicides);
+                    statsSummary.TeamKills = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == item.LegendNameKey).FirstOrDefault().Teamkos) - Convert.ToInt32(item.Teamkos);
+
+                    Logger.Debug(statsSummary.ToString());
+                    statsSummaries.Add(statsSummary);
+                }
+
+                return statsSummaries;
             }
-            return statsSummaries;
+            catch (Exception ex)
+            {
+                Log.Error("Exception: ", ex);
+            }
+            return null;
         }
     }
 }

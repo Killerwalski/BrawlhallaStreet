@@ -12,6 +12,7 @@ namespace BrawlhallaStreet.Core.Modules
         private readonly CommandService CommandService;
         private readonly IConfigurationRoot Configuration;
         private readonly IDataService DataService;
+        private StreetBot StreetBot;
 
         public CommandModule(CommandService service, IConfigurationRoot config)
         {

@@ -7,6 +7,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -34,25 +35,20 @@ namespace BrawlhallaStreet.Tests
                 .AddJsonFile(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\BrawlhallaStreeet.Cli\appsettings.Development.json", false, true)
                 .Build();
 
-            DataService = new BrawlhallaDataService(Configuration, Logger);
+            // DataService = new BrawlhallaDataService(Configuration, Logger);
+            DataService = new FakeDataService(Configuration, Logger);
             StreetBot = new StreetBot(Configuration, Logger, DataService);
 
             //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
         }
 
         [Fact]
-        public async Task Command_Module_Outputs_Last_Recap()
-        {
-            var service = new Discord.Commands.CommandService();
-            var commandModule = new CommandModule(service, Configuration);
-            await commandModule.Recap();
-        }
-
-        [Fact]
         public async Task Calculate_Difference_Between_Last_Two_PlayersAsync()
         {
-            await StreetBot.CalculateStatsForPlayerGameSpan(3879460);
-
+            var sut = await StreetBot.CalculateStatsForPlayerGameSpan(3879460);
+            
+            Assert.NotNull(sut);
+            Log.Information(sut.FirstOrDefault()?.ToString());
         }
 
         [Fact]
