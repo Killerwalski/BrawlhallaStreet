@@ -2,67 +2,29 @@
 using Discord;
 using Discord.WebSocket;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Configuration.Binder;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BrawlhallaStreet.Core
 {
     // This should act more as a utility class rather than something to interface with discord
-    public class StreetBot 
+    public class StreetBot
     {
         private DiscordSocketClient Client;
-		private readonly IConfigurationRoot Configuration;
-		private readonly IDataService DataService;
-		public ILogger Logger;
+        private readonly IConfigurationRoot Configuration;
+        private readonly IDataService DataService;
+        public ILogger Logger;
 
-		public StreetBot(IConfigurationRoot configuration, ILogger logger, IDataService dataService)
-		{
-			Configuration = configuration;
+        public StreetBot(IConfigurationRoot configuration, ILogger logger, IDataService dataService)
+        {
+            Configuration = configuration;
             Logger = logger;
-			DataService = dataService;
-		}
-
-		public async Task MainAsync()
-		{
-			await SetupLogger();
-			Client = new DiscordSocketClient();
-			Client.Log += Log;
-
-			await Client.LoginAsync(TokenType.Bot,
-				Configuration["DiscordToken"]);
-			await Client.StartAsync();
-
-            IMessageChannel CurrentChannel;
-
-            // This will add an event.
-            // Client.MessageUpdated += MessageUpdated;
-
-            Client.MessageReceived += GetOwnerDmChannelAsync;
-
-            Client.Ready += () =>
-            {
-                Console.WriteLine("Bot is connected!");
-
-                CurrentChannel = GetBrawlhallaMessageChannel();
-
-                // await GetOwnerDmChannelAsync();
-                // await TestMethod();
-
-                return Task.CompletedTask;
-            };
-
-
-            await Task.Delay(-1);
-            await Client.StopAsync();
-			Client.Dispose();
-		}
+            DataService = dataService;
+        }
 
         private async Task<IMessageChannel> GetOwnerDmChannelAsync(SocketMessage socketMessage)
         {
@@ -83,28 +45,23 @@ namespace BrawlhallaStreet.Core
             // await currentChannel.SendMessageAsync("Hello World");
             return currentChannel;
         }
-        public async Task TestMethod()
+
+        public async Task LogSummaries()
         {
             var playerIds = Configuration.GetSection("PlayerIds").Get<List<int>>();
             try
             {
-                while (true)
+                foreach (var playerId in playerIds)
                 {
-                    foreach (var playerId in playerIds)
+                    var refreshed = await RefreshedPlayer(playerId);
+                    if (refreshed)
                     {
-                        var refreshed = await RefreshedPlayer(playerId);
-                        if (refreshed)
+                        var summaries = await CalculateStatsForPlayerGameSpan(playerId);
+                        foreach (var item in summaries)
                         {
-                            var summaries = await CalculateStatsForPlayerGameSpan(playerId);
-                            foreach (var item in summaries)
-                            {
-                                Logger.Information(item.ToString());
-                                var currentChannel = GetBrawlhallaMessageChannel();
-                            }
+                            Logger.Information(item.ToString());
                         }
                     }
-
-                    await Task.Delay(120 * 100);
                 }
             }
             catch (Exception ex)
@@ -124,11 +81,9 @@ namespace BrawlhallaStreet.Core
             await channel.SendMessageAsync("Hello World");
         }
 
-
-
         public async Task<bool> RefreshedPlayer(int playerId)
         {
-			var player = await DataService.GetBrawlhallaPlayerFromApi(playerId);
+            var player = await DataService.GetBrawlhallaPlayerFromApi(playerId);
 
             // Check if player has played
             Logger.Information("Checking to see if player has updated");
@@ -141,20 +96,20 @@ namespace BrawlhallaStreet.Core
             return false;
         }
 
-		private Task SetupLogger()
+        private Task SetupLogger()
         {
-			Logger = new LoggerConfiguration()
-				.Enrich.FromLogContext()
-				.WriteTo.Console()
-				.CreateLogger()
-				.ForContext<StreetBot>();
+            Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger()
+                .ForContext<StreetBot>();
 
-			return Task.CompletedTask;
-		}
+            return Task.CompletedTask;
+        }
 
-		private Task Log(LogMessage msg)
+        private Task Log(LogMessage msg)
         {
-			Logger.Information(msg.ToString());
+            Logger.Information(msg.ToString());
             // Console.WriteLine(msg.ToString());
             return Task.CompletedTask;
         }
@@ -163,7 +118,7 @@ namespace BrawlhallaStreet.Core
         {
             List<StatsSummary> statsSummaries = new List<StatsSummary>();
             var playerEntries = await DataService.GetLatestEntriesForPlayer(playerId);
-            
+
             // Compare Difference
             var gameDiff = playerEntries[0].Games - playerEntries[1].Games;
             var oldLegendData = playerEntries[1].Legends.ToList();

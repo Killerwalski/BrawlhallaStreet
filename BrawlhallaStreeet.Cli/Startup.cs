@@ -33,7 +33,6 @@ namespace BrawlhallaStreet.Cli
               .WriteTo.File("BrawlhallaStreet-Cli.log", fileSizeLimitBytes: 10000000)
               .CreateLogger();
 
-
             Log.Information("Application Starting");
         }
 
@@ -51,9 +50,9 @@ namespace BrawlhallaStreet.Cli
             var provider = services.BuildServiceProvider();     // Build the service provider
             provider.GetRequiredService<LoggingService>();      // Start the logging service
             provider.GetRequiredService<IDataService>();
-            //provider.GetRequiredService<CommandHandler>(); 		// Start the command handler service
+            provider.GetRequiredService<CommandHandler>(); 		// Start the command handler service
 
-            // await provider.GetRequiredService<StartupService>().StartAsync();       // Start the startup service
+            await provider.GetRequiredService<StartupService>().StartAsync();       // Start the startup service
 
             await Task.Delay(-1);                               // Keep the program alive
         }
@@ -70,12 +69,12 @@ namespace BrawlhallaStreet.Cli
                 LogLevel = LogSeverity.Verbose,     // Tell the logger to give Verbose amount of info
                 DefaultRunMode = RunMode.Async,     // Force all commands to run async by default
             }))
-            //.AddSingleton<CommandHandler>()         // Add the command handler to the collection
-            //.AddSingleton<StartupService>()         // Add startupservice to the collection
+            .AddSingleton<CommandHandler>()         // Add the command handler to the collection
+            .AddSingleton<StartupService>()         // Add startupservice to the collection
             .AddSingleton<LoggingService>()         // Add loggingservice to the collection
             .AddSingleton<Random>()                 // Add random to the collection
             .AddSingleton(Configuration);           // Add the configuration to the collection
-
+            
             services.AddSingleton(Log.Logger);
             services.AddTransient<IDataService, BrawlhallaDataService>();
         }

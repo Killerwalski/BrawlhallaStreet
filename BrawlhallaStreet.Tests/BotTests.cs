@@ -58,7 +58,6 @@ namespace BrawlhallaStreet.Tests
         [Fact]
         public async Task StreetBot_Saves_Updated_Player_Data()
         {
-            await StreetBot.TestMethod();
 
         }
 
