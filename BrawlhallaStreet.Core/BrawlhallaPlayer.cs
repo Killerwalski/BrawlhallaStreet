@@ -8,6 +8,7 @@ namespace BrawlhallaStreet.Core
     [BsonIgnoreExtraElements]
     public class BrawlhallaPlayer
     {
+        [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
         public DateTime CreatedDate { get; set; }
 
         [JsonProperty("brawlhalla_id")]

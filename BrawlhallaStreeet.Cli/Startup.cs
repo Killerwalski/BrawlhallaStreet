@@ -1,4 +1,5 @@
-﻿using BrawlhallaStreet.Core.Services;
+﻿using BrawlhallaStreet.Core;
+using BrawlhallaStreet.Core.Services;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -73,7 +74,8 @@ namespace BrawlhallaStreet.Cli
             .AddSingleton<StartupService>()         // Add startupservice to the collection
             .AddSingleton<LoggingService>()         // Add loggingservice to the collection
             .AddSingleton<Random>()                 // Add random to the collection
-            .AddSingleton(Configuration);           // Add the configuration to the collection
+            .AddSingleton(Configuration)           // Add the configuration to the collection
+            .AddSingleton<StreetBot>();
             
             services.AddSingleton(Log.Logger);
             services.AddTransient<IDataService, BrawlhallaDataService>();

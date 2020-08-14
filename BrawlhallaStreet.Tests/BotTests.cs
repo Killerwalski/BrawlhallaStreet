@@ -35,11 +35,16 @@ namespace BrawlhallaStreet.Tests
                 .AddJsonFile(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\BrawlhallaStreeet.Cli\appsettings.Development.json", false, true)
                 .Build();
 
-            // DataService = new BrawlhallaDataService(Configuration, Logger);
-            DataService = new FakeDataService(Configuration, Logger);
+            DataService = new BrawlhallaDataService(Configuration, Logger);
+            // DataService = new FakeDataService(Configuration, Logger);
             StreetBot = new StreetBot(Configuration, Logger, DataService);
 
             //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
+        }
+        [Fact]
+        public async Task StreetBot_Updates_Database()
+        {
+            await StreetBot.RefreshedPlayer(3879460);
         }
 
         [Fact]
@@ -52,9 +57,11 @@ namespace BrawlhallaStreet.Tests
         }
 
         [Fact]
-        public async Task StreetBot_Saves_Updated_Player_Data()
+        public async Task Command_Module_Working_With_Streetbot()
         {
-
+            var commandModule = new CommandModule(null, Configuration, Logger, StreetBot);
+            var output = await commandModule.GetRecap();
+            Log.Debug(output);
         }
 
         [Fact]

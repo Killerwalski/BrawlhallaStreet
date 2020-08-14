@@ -2,6 +2,7 @@
 using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Configuration;
+using Serilog;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,13 +12,15 @@ namespace BrawlhallaStreet.Core.Modules
     {
         private readonly CommandService CommandService;
         private readonly IConfigurationRoot Configuration;
-        private readonly IDataService DataService;
+        private readonly ILogger Logger;
         private StreetBot StreetBot;
 
-        public CommandModule(CommandService service, IConfigurationRoot config)
+        public CommandModule(CommandService service, IConfigurationRoot config, ILogger logger, StreetBot streetBot)
         {
             CommandService = service;
             Configuration = config;
+            Logger = logger;
+            StreetBot = streetBot;
         }
 
         [Command("help")]
@@ -57,16 +60,32 @@ namespace BrawlhallaStreet.Core.Modules
         [Command("recap"), Alias("r")]
         [Summary("Make the bot recap the last game")]
         // [RequireUserPermission(GuildPermission.Administrator)]
-        public Task Recap()
+        public async Task Recap()
         {
-            var output = "Hello";
-            return ReplyAsync(output);
+            var recaps = await StreetBot.GetPlayerSummaries();
+            string output = string.Empty;
+            foreach (var recap in recaps)
+            {
+                output += recap.ToString() + "\n";
+            }
+            if (output == string.Empty)
+                output += "No games to recap!";
+            if (output.Length > 2000)
+            {
+                output = output.Substring(0, 1990) + "[TRIMMED]";
+            }
+            await ReplyAsync(output);
         }
 
-        //public Task Recap([Remainder] string text)
-        //{
-
-        //    return ReplyAsync(text);
-        //}
+        public async Task<string> GetRecap()
+        {
+            var recaps = await StreetBot.GetPlayerSummaries();
+            string output = string.Empty;
+            foreach (var recap in recaps)
+            {
+                output += recap.ToString() + "\n";
+            }
+            return output;
+        }
     }
 }
