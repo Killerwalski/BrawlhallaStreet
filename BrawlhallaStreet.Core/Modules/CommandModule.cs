@@ -1,8 +1,8 @@
-﻿using BrawlhallaStreet.Core.Services;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using Serilog;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -58,32 +58,117 @@ namespace BrawlhallaStreet.Core.Modules
         }
 
         [Command("recap"), Alias("r")]
-        [Summary("Make the bot recap the last game")]
+        [Summary("Make the bot recap the last game span")]
         // [RequireUserPermission(GuildPermission.Administrator)]
         public async Task Recap()
         {
-            var recaps = await StreetBot.GetPlayerSummaries();
-            string output = string.Empty;
-            foreach (var recap in recaps)
+            var allPlayerRecaps = await StreetBot.GetPlayerSummaries();
+            if (allPlayerRecaps.Count == 0)
             {
-                output += recap.ToString() + "\n";
+                await ReplyAsync("No games to update!");
+                return;
             }
+            
+            //var recapBuilders = FormatRecaps(allPlayerRecaps.FirstOrDefault());
+            //foreach (var item in recapBuilders)
+            //{
+            //    await ReplyAsync("", false, item.Build());
+            //}
+
+
+            foreach (var playerRecap in allPlayerRecaps)
+            {
+                var recapBuilders = FormatRecaps(playerRecap);
+                foreach (var builder in recapBuilders)
+                {
+                    await ReplyAsync("", false, builder.Build());
+                    // TODO make usre we're not spamming
+                }
+            }
+
+        }
+
+        //[Command("testEmbed")]
+        [Summary("Dev feature")]
+        [RequireUserPermission(GuildPermission.Administrator)]
+        public async Task TestEmbed()
+        {
+            var builder = new EmbedBuilder()
+            {
+                Color = new Color(114, 137, 218),
+                Title = ""
+            };
+            for (int i = 0; i < 10; i++)
+            {
+                builder.AddField(x =>
+                {
+                    x.Name = "Count";
+                    x.Value = i;
+
+                    x.IsInline = true;
+                });
+            }
+
+            await ReplyAsync("", false, builder.Build());
+        }
+
+        public List<EmbedBuilder> FormatRecaps(List<StatsSummary> statsSummaries)
+        {
+            var builders = new List<EmbedBuilder>();
+
+            var builder = new EmbedBuilder()
+            {
+                Color = new Color(222, 137, 218),
+                Title = "Legend Summaries for Player: " + statsSummaries.FirstOrDefault().PlayerName
+            };
+            builder.AddField(x =>
+            {
+                x.Name = "Legends Played";
+                x.Value = statsSummaries.Count;
+            });
+            builders.Add(builder);
+            foreach (var legend in statsSummaries)
+            {
+                // Each legend should be its own builder
+                builders.Add(FormatLegend(legend));
+            }
+            return builders;
+        }
+
+        public EmbedBuilder FormatLegend(StatsSummary statsSummary)
+        {
+            var builder = new EmbedBuilder()
+            {
+                Color = new Color(114, 137, 218),
+                Title = statsSummary.LegendName
+            };
+            var count = 0;
+            var summaryProps = typeof(StatsSummary).GetProperties().Where(x => x.Name != "LegendName" && x.Name != "PlayerName").ToList();
+            foreach (var property in summaryProps)
+            {
+                count = summaryProps.IndexOf(property);
+                if (count == 0)
+                    count++;
+                builder.AddField(x =>
+                {
+                    x.Name = property.Name;
+                    x.Value = property.GetValue(statsSummary, null);
+                    x.IsInline = true; 
+                });
+            }
+
+            return builder;
+        }
+
+        public string FormatRecapsOld(List<StatsSummary> recaps)
+        {
+            string output = string.Empty;
+            recaps.ForEach(x => output += x.ToString());
             if (output == string.Empty)
                 output += "No games to recap!";
             if (output.Length > 2000)
             {
                 output = output.Substring(0, 1990) + "[TRIMMED]";
-            }
-            await ReplyAsync(output);
-        }
-
-        public async Task<string> GetRecap()
-        {
-            var recaps = await StreetBot.GetPlayerSummaries();
-            string output = string.Empty;
-            foreach (var recap in recaps)
-            {
-                output += recap.ToString() + "\n";
             }
             return output;
         }

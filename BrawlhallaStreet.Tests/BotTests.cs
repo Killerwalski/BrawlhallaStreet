@@ -41,7 +41,20 @@ namespace BrawlhallaStreet.Tests
 
             //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
         }
+
         [Fact]
+        public async Task StatsSummaries_Are_Formatted_PrettyAsync()
+        {
+            var commandModule = new CommandModule(null, Configuration, Logger, StreetBot);
+            var recaps = await StreetBot.CalculateStatsForPlayerGameSpan(3879460);
+            // 0  1  2
+            // 3x  4  5
+            // 6x  7  8
+            // 9x  10 11
+            var outputs = commandModule.FormatRecaps(recaps);
+        }
+
+        [Fact (Skip = "Updates DB")]
         public async Task StreetBot_Updates_Database()
         {
             await StreetBot.RefreshedPlayer(3879460);
@@ -56,13 +69,6 @@ namespace BrawlhallaStreet.Tests
             Log.Information(sut.FirstOrDefault()?.ToString());
         }
 
-        [Fact]
-        public async Task Command_Module_Working_With_Streetbot()
-        {
-            var commandModule = new CommandModule(null, Configuration, Logger, StreetBot);
-            var output = await commandModule.GetRecap();
-            Log.Debug(output);
-        }
 
         [Fact]
         public void StreetBot_Gets_Configuration()

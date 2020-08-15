@@ -25,9 +25,11 @@ namespace BrawlhallaStreet.Core
             DataService = dataService;
         }
 
-        public async Task<List<StatsSummary>> GetPlayerSummaries()
+        public async Task<List<List<StatsSummary>>> GetPlayerSummaries()
         {
+            List<List<StatsSummary>> allSummaries = new List<List<StatsSummary>>();
             List<StatsSummary> summaries = new List<StatsSummary>();
+            // This is going to mess us up, probably should be a List<List<StatsSummary> for each player
             var playerIds = Configuration.GetSection("PlayerIds").Get<List<int>>();
             try
             {
@@ -37,10 +39,8 @@ namespace BrawlhallaStreet.Core
                     if (refreshed)
                     {
                         summaries = await CalculateStatsForPlayerGameSpan(playerId);
-                        foreach (var item in summaries)
-                        {
-                            Logger.Information(item.ToString());
-                        }
+                        // Should add to the collection of players here
+                        allSummaries.Add(summaries);
                     }
                     else
                         Logger.Debug("PlayerId " + playerId + " Has no new games.");
@@ -51,7 +51,7 @@ namespace BrawlhallaStreet.Core
                 Logger.Error("Exception During MainAsync: ", ex);
                 throw;
             }
-            return summaries;
+            return allSummaries;
         }
 
 
@@ -88,7 +88,7 @@ namespace BrawlhallaStreet.Core
                 foreach (var oldLegend in oldLegendIntersect)
                 {
                     var gamesPlayed = newLegendData.Where(x => x.LegendNameKey == oldLegend.LegendNameKey).FirstOrDefault().Games - oldLegend.Games;
-                    Logger.Information("Player played " + gamesPlayed + " game(s) With " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(oldLegend.LegendNameKey));
+                    Logger.Debug("Player played " + gamesPlayed + " game(s) With " + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(oldLegend.LegendNameKey));
 
                     var statsSummary = new StatsSummary();
                     statsSummary.GamesPlayed = gamesPlayed;
@@ -113,7 +113,7 @@ namespace BrawlhallaStreet.Core
                     statsSummary.Suicides = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == oldLegend.LegendNameKey).FirstOrDefault().Suicides) - Convert.ToInt32(oldLegend.Suicides);
                     statsSummary.TeamKills = Convert.ToInt32(newLegendData.Where(x => x.LegendNameKey == oldLegend.LegendNameKey).FirstOrDefault().Teamkos) - Convert.ToInt32(oldLegend.Teamkos);
 
-                    Logger.Debug(statsSummary.ToString());
+                    // Logger.Debug(statsSummary.ToString());
                     statsSummaries.Add(statsSummary);
                 }
 
