@@ -17,6 +17,9 @@ namespace BrawlhallaStreeet.Cli
 
         private static async Task Main(string[] args)
         {
+            //var scraper = new Scraper();
+            //await scraper.ScrapeLegendImages();
+
             await Startup.RunAsync(args);
 
             Console.WriteLine("Hello World!");

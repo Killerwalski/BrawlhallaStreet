@@ -140,8 +140,10 @@ namespace BrawlhallaStreet.Core.Modules
             var builder = new EmbedBuilder()
             {
                 Color = new Color(114, 137, 218),
-                Title = statsSummary.LegendName
-            };
+                Title = statsSummary.LegendName,
+                ImageUrl = GetImageUrlForLegend(statsSummary.LegendName)
+
+        };
             var count = 0;
             var summaryProps = typeof(StatsSummary).GetProperties().Where(x => x.Name != "LegendName" && x.Name != "PlayerName").ToList();
             foreach (var property in summaryProps)
@@ -158,6 +160,15 @@ namespace BrawlhallaStreet.Core.Modules
             }
 
             return builder;
+        }
+
+        private string GetImageUrlForLegend(string legendName)
+        {
+            var image = @"https://brawlhalla.com/c/uploads/2018/11/" + legendName + ".png";
+
+            // TODO: Verify Image, maybe get more and pick a random one?
+
+            return image;
         }
 
         public string FormatRecapsOld(List<StatsSummary> recaps)
