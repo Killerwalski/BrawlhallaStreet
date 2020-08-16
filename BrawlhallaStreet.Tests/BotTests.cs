@@ -1,4 +1,5 @@
-﻿using BrawlhallaStreet.Core;
+﻿using BrawlhallaStreeet.Cli;
+using BrawlhallaStreet.Core;
 using BrawlhallaStreet.Core.Modules;
 using BrawlhallaStreet.Core.Services;
 using Microsoft.Extensions.Configuration;
@@ -41,7 +42,12 @@ namespace BrawlhallaStreet.Tests
 
             //var connectionString = Configuration["BrawlhallaDatabaseSettings:ConnectionString"];
         }
-
+        [Fact]
+        public async Task Scraper_Scrapes_LegendUrls()
+        {
+            Scraper scraper = new Scraper();
+            await scraper.ScrapeLegendImages();
+        }
         [Fact]
         public void CommandModule_Gets_Legend_Image()
         {

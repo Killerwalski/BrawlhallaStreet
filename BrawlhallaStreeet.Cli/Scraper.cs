@@ -1,15 +1,9 @@
 ﻿using AngleSharp;
-using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
-using AngleSharp.Html.Parser;
 using Newtonsoft.Json;
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace BrawlhallaStreeet.Cli
@@ -93,7 +87,7 @@ namespace BrawlhallaStreeet.Cli
                     // Also Search for each word in Legend Name if empty
                     if (legendImage == null)
                     {
-                        var names = legend.ToLower().Split(' ');
+                        var names = legend.ToLower().Split(' ').Reverse();
                         foreach (var name in names)
                         {
                             legendImage = (IHtmlImageElement)images.Where(x => x.GetAttribute("src").ToLower().Contains(name)).FirstOrDefault();
@@ -108,38 +102,6 @@ namespace BrawlhallaStreeet.Cli
             }
             var serialized = JsonConvert.SerializeObject(legendImages, Formatting.Indented);
             System.IO.File.WriteAllText(@"C:\Code\Repositories\BrawlhallaStreet\BrawlhallaStreet.Core\Images\LegendImageUrls.json", serialized);
-        }
-
-        public async Task Scrape()
-        {
-            var siteUrl = @"https://www.brawlhalla.com/legends/";
-            CancellationTokenSource cancellationToken = new CancellationTokenSource();
-            HttpClient httpClient = new HttpClient();
-            HttpResponseMessage request = await httpClient.GetAsync(siteUrl);
-            cancellationToken.Token.ThrowIfCancellationRequested();
-
-            Stream response = await request.Content.ReadAsStreamAsync();
-            cancellationToken.Token.ThrowIfCancellationRequested();
-
-            HtmlParser parser = new HtmlParser();
-            IHtmlDocument document = parser.ParseDocument(response);
-            IEnumerable<IElement> articleLink = document.All.Where(x => x.ClassName == "class");
-            if (articleLink.Any())
-            {
-                // Print Results: See Next Step
-            }
-        }
-
-        public void ScrapeLegendsOld()
-        {
-            foreach (var item in Legends)
-            {
-                var uri = new Uri(BaseUrl + item + ".png");
-                using (WebClient client = new WebClient())
-                {
-                    client.DownloadFile(uri, @"c:\temp\image35.png");
-                }
-            }
         }
     }
 }
