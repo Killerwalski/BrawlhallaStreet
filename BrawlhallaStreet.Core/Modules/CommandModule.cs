@@ -3,7 +3,9 @@ using Discord.Commands;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace BrawlhallaStreet.Core.Modules
@@ -68,13 +70,6 @@ namespace BrawlhallaStreet.Core.Modules
                 await ReplyAsync("No games to update!");
                 return;
             }
-            
-            //var recapBuilders = FormatRecaps(allPlayerRecaps.FirstOrDefault());
-            //foreach (var item in recapBuilders)
-            //{
-            //    await ReplyAsync("", false, item.Build());
-            //}
-
 
             foreach (var playerRecap in allPlayerRecaps)
             {
@@ -82,10 +77,8 @@ namespace BrawlhallaStreet.Core.Modules
                 foreach (var builder in recapBuilders)
                 {
                     await ReplyAsync("", false, builder.Build());
-                    // TODO make usre we're not spamming
                 }
             }
-
         }
 
         //[Command("testEmbed")]
@@ -142,8 +135,7 @@ namespace BrawlhallaStreet.Core.Modules
                 Color = new Color(114, 137, 218),
                 Title = statsSummary.LegendName,
                 ImageUrl = GetImageUrlForLegend(statsSummary.LegendName)
-
-        };
+            };
             var count = 0;
             var summaryProps = typeof(StatsSummary).GetProperties().Where(x => x.Name != "LegendName" && x.Name != "PlayerName").ToList();
             foreach (var property in summaryProps)
@@ -155,20 +147,27 @@ namespace BrawlhallaStreet.Core.Modules
                 {
                     x.Name = property.Name;
                     x.Value = property.GetValue(statsSummary, null);
-                    x.IsInline = true; 
+                    x.IsInline = true;
                 });
             }
 
             return builder;
         }
 
-        private string GetImageUrlForLegend(string legendName)
+        public string GetImageUrlForLegend(string legendName)
         {
-            var image = @"https://brawlhalla.com/c/uploads/2018/11/" + legendName + ".png";
-
-            // TODO: Verify Image, maybe get more and pick a random one?
-
-            return image;
+            var filename = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\images\LegendImageUrls.json";
+            if (!File.Exists(filename))
+            {
+                Logger.Error(@"Legend Image URL Data not found. Scrape the images from the web and save them in \images\LegendImageUrls.json");
+                return string.Empty;
+            }
+            var json = File.ReadAllText(filename);
+            var images = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            if (images.ContainsKey(legendName))
+                return images[legendName];
+            Logger.Error("Legend: " + legendName + " Not found in Legend Image dictionary!");
+            return string.Empty;
         }
 
         public string FormatRecapsOld(List<StatsSummary> recaps)

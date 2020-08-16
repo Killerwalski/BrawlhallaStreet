@@ -43,6 +43,15 @@ namespace BrawlhallaStreet.Tests
         }
 
         [Fact]
+        public void CommandModule_Gets_Legend_Image()
+        {
+            var commandModule = new CommandModule(null, Configuration, Logger, StreetBot);
+            var imgUrl = commandModule.GetImageUrlForLegend("Hattori");
+            Logger.Debug(imgUrl);
+            Assert.NotEmpty(imgUrl);
+        }
+
+        [Fact]
         public async Task StatsSummaries_Are_Formatted_PrettyAsync()
         {
             var commandModule = new CommandModule(null, Configuration, Logger, StreetBot);
